@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  dagster_postgresql:
+    image: postgres:13
+    container_name: dagster_postgresql
+    restart: always
+    environment:
+      POSTGRES_USER: dagster
+      POSTGRES_PASSWORD: dagster
+      POSTGRES_DB: dagster
+    volumes:
+      - dagster_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dagster"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  dagster_webserver:
+    build: .
+    container_name: dagster_webserver
+    restart: always
+    entrypoint: dagster-webserver -h 0.0.0.0 -p 3001 -w workspace.yaml
+    ports:
+      - "3001:3001"
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+      DAGSTER_POSTGRES_USER: dagster
+      DAGSTER_POSTGRES_PASSWORD: dagster
+      DAGSTER_POSTGRES_DB: dagster
+      DAGSTER_POSTGRES_HOST: dagster_postgresql
+      CLICKHOUSE_HOST: host.docker.internal
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: admin
+      CLICKHOUSE_PASSWORD: yourpassword
+    volumes:
+      - ./workspace.yaml:/opt/dagster/app/workspace.yaml
+      - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+      - ./dagster_dbt_project:/opt/dagster/app/dagster_dbt_project
+      - ../clickhouse-dbt/clickhouse_dbt:/opt/dagster/dbt/clickhouse_dbt
+      - ~/.dbt:/root/.dbt
+      - dagster_home:/opt/dagster/dagster_home
+    depends_on:
+      dagster_postgresql:
+        condition: service_healthy
+
+  dagster_daemon:
+    build: .
+    container_name: dagster_daemon
+    restart: always
+    entrypoint: dagster-daemon run
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+      DAGSTER_POSTGRES_USER: dagster
+      DAGSTER_POSTGRES_PASSWORD: dagster
+      DAGSTER_POSTGRES_DB: dagster
+      DAGSTER_POSTGRES_HOST: dagster_postgresql
+      CLICKHOUSE_HOST: host.docker.internal
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: admin
+      CLICKHOUSE_PASSWORD: yourpassword
+    volumes:
+      - ./workspace.yaml:/opt/dagster/app/workspace.yaml
+      - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+      - ./dagster_dbt_project:/opt/dagster/app/dagster_dbt_project
+      - ../clickhouse-dbt/clickhouse_dbt:/opt/dagster/dbt/clickhouse_dbt
+      - ~/.dbt:/root/.dbt
+      - dagster_home:/opt/dagster/dagster_home
+    depends_on:
+      dagster_postgresql:
+        condition: service_healthy
+
+volumes:
+  dagster_postgres_data:
+  dagster_home:

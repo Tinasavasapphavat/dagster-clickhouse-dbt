@@ -1,0 +1,7 @@
+storage:
+  postgres:
+    postgres_url: "postgresql://dagster:dagster@dagster_postgresql:5432/dagster"
+
+scheduler:
+  module: dagster.core.scheduler
+  class: DagsterDaemonScheduler
