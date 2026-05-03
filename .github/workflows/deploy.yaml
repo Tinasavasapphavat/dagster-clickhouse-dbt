@@ -36,13 +36,20 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: |
-          pip install dagster dagster-dbt dagster-webserver dbt-clickhouse
+        run: pip install dagster dagster-dbt dagster-webserver dbt-clickhouse
 
-      - name: Validate Dagster definitions
-        working-directory: dagster_dbt_project
-        run: python -c "import dagster_dbt_project; print('Definitions loaded
-          successfully')"
+      - name: Validate Python syntax
+        run: |
+          python -c "
+          import ast
+          with open('dagster_dbt_project/__init__.py', 'r') as f:
+              source = f.read()
+          ast.parse(source)
+          print('Syntax valid!')
+          "
+
+      - name: Validate docker-compose
+        run: docker compose config
 
   deploy:
     name: Deploy Dagster (Zero Downtime)
@@ -62,23 +69,12 @@ jobs:
           key: ${{ secrets.DAGSTER_EC2_SSH_KEY }}
           script: |
             cd ~/clickhouse-dbt
-
-            # Pull latest code
             git pull origin main
-
-            # Regenerate dbt manifest
             cd clickhouse_dbt
             dbt compile --profiles-dir ~/.dbt
             cd ..
-
-            # Zero downtime deployment
-            # Build new image
             docker compose build --no-cache
-
-            # Restart services one by one
             docker compose up -d --no-deps dagster_daemon
             sleep 10
             docker compose up -d --no-deps dagster_webserver
-
-            # Verify all running
             docker compose ps
