@@ -30,6 +30,6 @@ The actual data pipelines and orchestration logic are defined in Python:
 2. Make sure your ClickHouse dbt project exists at `../clickhouse-dbt/clickhouse_dbt` relative to this directory, or update the volume mapping in `docker-compose.yml`.
 3. Start the services:
    ```bash
-   docker-compose up --build -d
+   docker-compose up --build -d 
    ```
 4. Access the Dagster UI by navigating to `http://localhost:3001` in your browser.
