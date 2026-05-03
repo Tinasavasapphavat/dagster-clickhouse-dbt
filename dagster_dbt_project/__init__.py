@@ -9,7 +9,7 @@ dbt_project.prepare_if_dev()
 
 @dbt_assets(manifest=dbt_project.manifest_path)
 def clickhouse_dbt_assets(context, dbt: DbtCliResource):
-    yield from dbt.cli(["run"], context=context).stream()
+    yield from dbt.cli(["run", "-s", "+int_trades+"], context=context).stream()
 
 dbt_job = define_asset_job(
     name="dbt_job_incremental",
