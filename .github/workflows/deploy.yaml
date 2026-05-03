@@ -6,12 +6,20 @@ on:
       - main
       - develop
     paths:
-      - 'dagster/**'
+      - "dagster_dbt_project/**"
+      - "docker-compose.yml"
+      - "Dockerfile"
+      - "workspace.yaml"
+      - "dagster.yaml"
   pull_request:
     branches:
       - main
     paths:
-      - 'dagster/**'
+      - "dagster_dbt_project/**"
+      - "docker-compose.yml"
+      - "Dockerfile"
+      - "workspace.yaml"
+      - "dagster.yaml"
 
 jobs:
   test:
@@ -25,15 +33,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
           pip install dagster dagster-dbt dagster-webserver dbt-clickhouse
 
       - name: Validate Dagster definitions
-        working-directory: dagster/dagster_dbt_project
-        run: python -c "from dagster_dbt_project import defs; print('Definitions loaded successfully')"
+        working-directory: dagster_dbt_project
+        run: python -c "import dagster_dbt_project; print('Definitions loaded
+          successfully')"
 
   deploy:
     name: Deploy Dagster (Zero Downtime)
@@ -63,15 +72,13 @@ jobs:
             cd ..
 
             # Zero downtime deployment
-            cd dagster
-
             # Build new image
             docker compose build --no-cache
 
-            # Restart services one by one (zero downtime)
+            # Restart services one by one
             docker compose up -d --no-deps dagster_daemon
             sleep 10
             docker compose up -d --no-deps dagster_webserver
 
             # Verify all running
-            docker compose ps 
+            docker compose ps
