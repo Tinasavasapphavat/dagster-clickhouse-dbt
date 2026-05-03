@@ -71,21 +71,21 @@ jobs:
           key: ${{ secrets.DAGSTER_EC2_SSH_KEY }}
           script: |
             # Pull latest dagster repo
-            cd /home/ec2-user/dagster-clickhouse-dbt
+            cd ~/dagster-clickhouse-dbt
             git pull origin main
 
             # Pull latest dbt repo
-            cd /home/ec2-user/clickhouse-dbt
+            cd ~/clickhouse-dbt
             git pull origin main
 
             # Regenerate dbt manifest
-            cd /home/ec2-user/clickhouse-dbt/clickhouse_dbt
-            /home/ec2-user/.local/bin/dbt compile --profiles-dir /home/ec2-user/.dbt
+            cd ~/clickhouse-dbt/clickhouse_dbt
+            dbt compile --profiles-dir ~/.dbt
 
             # Zero downtime deployment
-            cd /home/ec2-user/dagster-clickhouse-dbt
-            /usr/bin/docker compose build --no-cache
-            /usr/bin/docker compose up -d --no-deps dagster_daemon
+            cd ~/dagster-clickhouse-dbt
+            docker compose build --no-cache
+            docker compose up -d --no-deps dagster_daemon
             sleep 10
-            /usr/bin/docker compose up -d --no-deps dagster_webserver
-            /usr/bin/docker compose ps
+            docker compose up -d --no-deps dagster_webserver
+            docker compose ps

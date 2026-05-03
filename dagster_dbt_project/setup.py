@@ -5,7 +5,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "dagster",
-        "dagster-dbt",
+        "dagster-dbt", 
         "dbt-clickhouse",
     ],
 )
