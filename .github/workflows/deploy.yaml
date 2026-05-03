@@ -11,6 +11,7 @@ on:
       - "Dockerfile"
       - "workspace.yaml"
       - "dagster.yaml"
+      - "README.md"
   pull_request:
     branches:
       - main
@@ -20,7 +21,8 @@ on:
       - "Dockerfile"
       - "workspace.yaml"
       - "dagster.yaml"
-
+      - "README.md"
+      
 jobs:
   test:
     name: Test Dagster
@@ -68,20 +70,20 @@ jobs:
           username: ec2-user
           key: ${{ secrets.DAGSTER_EC2_SSH_KEY }}
           script: |
-            # Find repo location
-            REPO_DIR=$(find ~ -name "docker-compose.yml" -not -path "*/\.*" 2>/dev/null | head -1 | xargs dirname)
-            echo "Found repo at: $REPO_DIR"
-            cd $REPO_DIR
+            # Pull latest dagster repo
+            cd ~/dagster-clickhouse-dbt
+            git pull origin main
 
-            # Pull latest code
+            # Pull latest dbt repo (needed for manifest)
+            cd ~/clickhouse-dbt
             git pull origin main
 
             # Regenerate dbt manifest
-            cd clickhouse_dbt
+            cd ~/clickhouse-dbt/clickhouse_dbt
             dbt compile --profiles-dir ~/.dbt
-            cd ..
 
             # Zero downtime deployment
+            cd ~/dagster-clickhouse-dbt
             docker compose build --no-cache
             docker compose up -d --no-deps dagster_daemon
             sleep 10
