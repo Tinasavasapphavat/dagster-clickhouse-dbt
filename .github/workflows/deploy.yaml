@@ -1,0 +1,77 @@
+name: Dagster CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'dagster/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'dagster/**'
+
+jobs:
+  test:
+    name: Test Dagster
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install dagster dagster-dbt dagster-webserver dbt-clickhouse
+
+      - name: Validate Dagster definitions
+        working-directory: dagster/dagster_dbt_project
+        run: python -c "from dagster_dbt_project import defs; print('Definitions loaded successfully')"
+
+  deploy:
+    name: Deploy Dagster (Zero Downtime)
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DAGSTER_EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.DAGSTER_EC2_SSH_KEY }}
+          script: |
+            cd ~/clickhouse-dbt
+
+            # Pull latest code
+            git pull origin main
+
+            # Regenerate dbt manifest
+            cd clickhouse_dbt
+            dbt compile --profiles-dir ~/.dbt
+            cd ..
+
+            # Zero downtime deployment
+            cd dagster
+
+            # Build new image
+            docker compose build --no-cache
+
+            # Restart services one by one (zero downtime)
+            docker compose up -d --no-deps dagster_daemon
+            sleep 10
+            docker compose up -d --no-deps dagster_webserver
+
+            # Verify all running
+            docker compose ps
