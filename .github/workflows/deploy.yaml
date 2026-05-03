@@ -74,4 +74,4 @@ jobs:
             docker compose up -d --no-deps dagster_webserver
 
             # Verify all running
-            docker compose ps
+            docker compose ps 
