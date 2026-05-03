@@ -24,7 +24,7 @@ The actual data pipelines and orchestration logic are defined in Python:
 * **dbt Integration**: It uses the `dagster-dbt` library to parse the dbt project located at `/opt/dagster/dbt/clickhouse_dbt`. It automatically creates Dagster software-defined assets from the dbt models using the `@dbt_assets` decorator.
 * **Jobs & Scheduling**: A job named `dbt_job_incremental` is defined to materialize all the loaded dbt assets. This job is attached to a schedule (`dbt_schedule`) that runs automatically every day at 6:00 AM UTC (`0 6 * * *`).
 
-## Getting Started
+## Getting Started 
 
 1. Ensure you have Docker and Docker Compose installed.
 2. Make sure your ClickHouse dbt project exists at `../clickhouse-dbt/clickhouse_dbt` relative to this directory, or update the volume mapping in `docker-compose.yml`.
