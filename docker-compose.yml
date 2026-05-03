@@ -30,7 +30,7 @@ services:
       DAGSTER_POSTGRES_PASSWORD: dagster
       DAGSTER_POSTGRES_DB: dagster
       DAGSTER_POSTGRES_HOST: dagster_postgresql
-      CLICKHOUSE_HOST: host.docker.internal
+      CLICKHOUSE_HOST: 172.31.26.38
       CLICKHOUSE_PORT: 8123
       CLICKHOUSE_USER: admin
       CLICKHOUSE_PASSWORD: yourpassword
@@ -38,8 +38,8 @@ services:
       - ./workspace.yaml:/opt/dagster/app/workspace.yaml
       - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
       - ./dagster_dbt_project:/opt/dagster/app/dagster_dbt_project
-      - ../clickhouse-dbt/clickhouse_dbt:/opt/dagster/dbt/clickhouse_dbt
-      - ~/.dbt:/root/.dbt
+      - /home/ec2-user/clickhouse-dbt/clickhouse_dbt:/opt/dagster/dbt/clickhouse_dbt
+      - /home/ec2-user/.dbt:/root/.dbt
       - dagster_home:/opt/dagster/dagster_home
     depends_on:
       dagster_postgresql:
@@ -56,7 +56,7 @@ services:
       DAGSTER_POSTGRES_PASSWORD: dagster
       DAGSTER_POSTGRES_DB: dagster
       DAGSTER_POSTGRES_HOST: dagster_postgresql
-      CLICKHOUSE_HOST: host.docker.internal
+      CLICKHOUSE_HOST: 172.31.26.38
       CLICKHOUSE_PORT: 8123
       CLICKHOUSE_USER: admin
       CLICKHOUSE_PASSWORD: yourpassword
@@ -64,8 +64,8 @@ services:
       - ./workspace.yaml:/opt/dagster/app/workspace.yaml
       - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
       - ./dagster_dbt_project:/opt/dagster/app/dagster_dbt_project
-      - ../clickhouse-dbt/clickhouse_dbt:/opt/dagster/dbt/clickhouse_dbt
-      - ~/.dbt:/root/.dbt
+      - /home/ec2-user/clickhouse-dbt/clickhouse_dbt:/opt/dagster/dbt/clickhouse_dbt
+      - /home/ec2-user/.dbt:/root/.dbt
       - dagster_home:/opt/dagster/dagster_home
     depends_on:
       dagster_postgresql:

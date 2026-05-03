@@ -79,7 +79,7 @@ jobs:
             git pull origin main
 
             # Regenerate dbt manifest
-            cd ~/clickhouse-dbt/clickhouse_dbt
+            cd ~/clickhouse-dbt/clickhouse_dbt/
             dbt compile --profiles-dir ~/.dbt
 
             # Zero downtime deployment
